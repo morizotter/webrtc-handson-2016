@@ -50,6 +50,8 @@ function prepareNewConnection() {
     }
 
     // ICE Candidateを収集した時のイベント
+
+    // Valilla ICE
     peer.onicecandidate = function (evt) {
         if (evt.candidate) {
             console.log(evt.candidate);
@@ -58,6 +60,18 @@ function prepareNewConnection() {
             sendSdp(peer.localDescription);
         }
     };
+
+    // // Tricle ICE
+    // peer.onicecandidate = function (evt) {
+    //     if (evt.candidate) {
+    //         // Trickle ICE の場合は、ICE candidateを相手に送る               
+    //         console.log(evt.candidate);
+    //         sendIceCandidate(evt.candidate);
+    //     } else {
+    //         // Trickle ICEの場合は何もしない
+    //         console.log('empty ice event');
+    //     }
+    // };
 
     // ローカルのストリームを利用できるように準備する
     if (localStream) {
@@ -78,3 +92,5 @@ function sendSdp(sessionDescription) {
     textForSendSdp.focus();
     textForSendSdp.onselect();
 }
+
+// Connectボタンが押されたら処理を開始
