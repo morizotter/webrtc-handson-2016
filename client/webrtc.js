@@ -82,7 +82,43 @@ function prepareNewConnection() {
         console.warn("no local stream, but continue.");
     }
 
+    // ICEのステータスを変更になった時の処理
+    peer.oniceconnectionstatechange = function () {
+        console.log("ICE connections Status has changed to " + peer.iceConnectionState);
+        switch (peer.iceConnectionState) {
+            case "closed":
+            case "failed":
+                // ICEのステートが切断状態または以上状態になったら切断処理を実行する
+                if (peerConnection) {
+                    hangUp();
+                }
+                break;
+            case "dissconnected":
+                break;
+        };
+    }
+
     return peer;
+}
+
+// P2P通信を切断する
+function hangUp() {
+    if (peerConnection) {
+        if (peerConnection.iceConnectionState !== "closed") {
+            peerConnection.close();
+            peerConnection = null;
+            cleanupVideoElement(remoteVideo);
+            textForSendSdp.value = "";
+            return;
+        }
+    }
+    console.log("peerConnection is closed.");
+}
+
+// ビデオエレメントを初期化する
+function cleanupVideoElement(element) {
+    element.pause();
+    element.srcObject = null;
 }
 
 // 手動シグナリングのための処理を追加する
