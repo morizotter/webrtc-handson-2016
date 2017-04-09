@@ -107,23 +107,23 @@ function connect() {
 // Offer SDPを生成する
 function makeOffer() {
     peerConnection = prepareNewConnection();
-    peerConnection.onnegotiationneeded = function(){
+    peerConnection.onnegotiationneeded = function () {
         peerConnection.createOffer()
             .then(function (sessionDescription) {
                 console.log('createOffer() succsess in promise');
                 return peerConnection.setLocalDescription(sessionDescription);
-            }).then(function() {
+            }).then(function () {
                 console.log('setLocalDescription() succsess in promise');
-        }).catch(function(err) {
-            console.error(err);
-        });
+            }).catch(function (err) {
+                console.error(err);
+            });
     }
 }
 
 // Answer SDPを生成する
 function makeAnswer() {
-    console.log('sending Answer. Creating remote session description...' );
-    if (! peerConnection) {
+    console.log('sending Answer. Creating remote session description...');
+    if (!peerConnection) {
         console.error('peerConnection NOT exist!');
         return;
     }
@@ -131,11 +131,11 @@ function makeAnswer() {
         .then(function (sessionDescription) {
             console.log('createAnswer() succsess in promise');
             return peerConnection.setLocalDescription(sessionDescription);
-        }).then(function() {
+        }).then(function () {
             console.log('setLocalDescription() succsess in promise');
-    }).catch(function(err) {
-        console.error(err);
-    });
+        }).catch(function (err) {
+            console.error(err);
+        });
 }
 
 // SDPのタイプを判別しセットする
@@ -143,52 +143,52 @@ function onSdpText() {
     const text = textToReceiveSdp.value;
     if (peerConnection) {
         // Offerした側が相手からのAnswerをセットする場合
-        console.log("Recieved answer text...");
+        console.log('Received answer text...');
         const answer = new RTCSessionDescription({
-            type: "answer",
-            sdp: text
+            type: 'answer',
+            sdp: text,
         });
         setAnswer(answer);
     }
     else {
         // Offerを受けた側が相手からのOfferをセットする場合
-        console.log("Received offer text...");
+        console.log('Received offer text...');
         const offer = new RTCSessionDescription({
-            type: "offer",
-            sdp: text
+            type: 'offer',
+            sdp: text,
         });
         setOffer(offer);
     }
-    textToReceiveSdp.value = "";
+    textToReceiveSdp.value = '';
 }
 
 // Offer側のSDPをセットした場合の処理
 function setOffer(sessionDescription) {
     if (peerConnection) {
-        console.error("peerConnection already exist!");
+        console.error('peerConnection alreay exist!');
     }
     peerConnection = prepareNewConnection();
-    peerConnection.onnegotiationneeded = function() {
+    peerConnection.onnegotiationneeded = function () {
         peerConnection.setRemoteDescription(sessionDescription)
-        .then(function() {
-            console.log("setRemoteDescription(offer) success in promise");
-            makeAnswer();
-        }).catch(function(err) {
-            console.error("setRemoteDescripton(offer) ERROR: ", err);
-        });
+            .then(function () {
+                console.log('setRemoteDescription(offer) succsess in promise');
+                makeAnswer();
+            }).catch(function (err) {
+                console.error('setRemoteDescription(offer) ERROR: ', err);
+            });
     }
 }
 
 // Answer側のSDPをセットした場合の処理
 function setAnswer(sessionDescription) {
     if (!peerConnection) {
-        console.error("peerConnection NOT exist");
+        console.error('peerConnection NOT exist!');
         return;
     }
     peerConnection.setRemoteDescription(sessionDescription)
-    .then(function() {
-        console.log("setRemoteDescription(answer) success in promise");
-    }).catch(function(err) {
-        console.error("setRemoteDescription(answer) ERROR: ", err);
-    });
+        .then(function () {
+            console.log('setRemoteDescription(answer) succsess in promise');
+        }).catch(function (err) {
+            console.error('setRemoteDescription(answer) ERROR: ', err);
+        });
 }
