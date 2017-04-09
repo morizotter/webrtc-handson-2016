@@ -6,14 +6,14 @@ let localStream = null;
 let peerConnection = null;
 
 function startVideo() {
-    navigator.mediaDevices.getUserMedia({video: true, audio: true})
-    .then(function (stream) { // success
-        playVideo(localVideo, stream);
-        localStream = stream;
-    }).catch(function (error) { // error
-        console.error("mediaDevice.getUserMedia() error: ", error);
-        return;
-    });
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        .then(function (stream) { // success
+            playVideo(localVideo, stream);
+            localStream = stream;
+        }).catch(function (error) { // error
+            console.error("mediaDevice.getUserMedia() error: ", error);
+            return;
+        });
 }
 
 function playVideo(element, stream) {
@@ -21,3 +21,6 @@ function playVideo(element, stream) {
     element.play();
 }
 
+function stopVideo(element, stream) {
+    console.log("stopVideo: not implemented");
+}
