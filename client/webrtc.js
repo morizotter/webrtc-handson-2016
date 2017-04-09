@@ -24,3 +24,57 @@ function playVideo(element, stream) {
 function stopVideo(element, stream) {
     console.log("stopVideo: not implemented");
 }
+
+// WebRTCを利用する準備をする
+function prepareNewConnection() {
+    // RTCPeerConnectionを初期化する
+    // NAT越えを手助けするユーティリティであるStunサーバ、TURNサーバのURLや認証情報を指定する
+    // ローカル環境で試験する場合はSTUN/TURN共に設定せず共繋がるが、練習のためにSkyWayが提供するSTUNサーバを設定してみる
+    const pc_config = {"iceServers": [{urls:"stun:stun.skyway.io:3478"}]};
+    const peer = new RTCPeerConnection(pc_config);
+
+    // リモートのストリームを受信した場合のイベントをセット
+    if ("ontrack" in peer) {
+        // Firefox向け
+        peer.ontrack = function(event) {
+            console.log("-- peer.ontrack()");
+            playVideo(remoteVideo, event.streams[0]);
+        };
+    }
+    else {
+        // Chrome向け
+        peer.onaddstream = function(event) {
+            console.log("-- peer.onaddstream()");
+            playVideo(remoteVideo, event.stream);
+        }
+    }
+
+    // ICE Candidateを収集した時のイベント
+    peer.onicecandidate = function (evt) {
+        if (evt.candidate) {
+            console.log(evt.candidate);
+        } else {
+            console.log("empty ice event");
+            sendSdp(peer.localDescription);
+        }
+    };
+
+    // ローカルのストリームを利用できるように準備する
+    if (localStream) {
+        console.log("Adding local stream...");
+        peer.addStream(localStream);
+    }
+    else {
+        console.warn("no local stream, but continue.");
+    }
+
+    return peer;
+}
+
+// 手動シグナリングのための処理を追加する
+function sendSdp(sessionDescription) {
+    console.log("---sending sdp ---");
+    textForSendSdp.value = sessionDescription.sdp;
+    textForSendSdp.focus();
+    textForSendSdp.onselect();
+}
