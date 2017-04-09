@@ -30,20 +30,20 @@ function prepareNewConnection() {
     // RTCPeerConnectionを初期化する
     // NAT越えを手助けするユーティリティであるStunサーバ、TURNサーバのURLや認証情報を指定する
     // ローカル環境で試験する場合はSTUN/TURN共に設定せず共繋がるが、練習のためにSkyWayが提供するSTUNサーバを設定してみる
-    const pc_config = {"iceServers": [{urls:"stun:stun.skyway.io:3478"}]};
+    const pc_config = { "iceServers": [{ urls: "stun:stun.skyway.io:3478" }] };
     const peer = new RTCPeerConnection(pc_config);
 
     // リモートのストリームを受信した場合のイベントをセット
     if ("ontrack" in peer) {
         // Firefox向け
-        peer.ontrack = function(event) {
+        peer.ontrack = function (event) {
             console.log("-- peer.ontrack()");
             playVideo(remoteVideo, event.streams[0]);
         };
     }
     else {
         // Chrome向け
-        peer.onaddstream = function(event) {
+        peer.onaddstream = function (event) {
             console.log("-- peer.onaddstream()");
             playVideo(remoteVideo, event.stream);
         }
@@ -90,7 +90,50 @@ function sendSdp(sessionDescription) {
     console.log("---sending sdp ---");
     textForSendSdp.value = sessionDescription.sdp;
     textForSendSdp.focus();
-    textForSendSdp.onselect();
+    textForSendSdp.select();
 }
 
 // Connectボタンが押されたら処理を開始
+function connect() {
+    if (!peerConnection) {
+        console.log("make Offer");
+        makeOffer();
+    }
+    else {
+        console.warn("peer already exist.");
+    }
+}
+
+// Offer SDPを生成する
+function makeOffer() {
+    peerConnection = prepareNewConnection();
+    peerConnection.onnegotiationneeded = function(){
+        peerConnection.createOffer()
+            .then(function (sessionDescription) {
+                console.log('createOffer() succsess in promise');
+                return peerConnection.setLocalDescription(sessionDescription);
+            }).then(function() {
+                console.log('setLocalDescription() succsess in promise');
+        }).catch(function(err) {
+            console.error(err);
+        });
+    }
+}
+
+// Answer SDPを生成する
+function makeAnswer() {
+    console.log('sending Answer. Creating remote session description...' );
+    if (! peerConnection) {
+        console.error('peerConnection NOT exist!');
+        return;
+    }
+    peerConnection.createAnswer()
+        .then(function (sessionDescription) {
+            console.log('createAnswer() succsess in promise');
+            return peerConnection.setLocalDescription(sessionDescription);
+        }).then(function() {
+            console.log('setLocalDescription() succsess in promise');
+    }).catch(function(err) {
+        console.error(err);
+    });
+}
