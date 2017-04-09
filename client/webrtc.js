@@ -16,7 +16,7 @@ function startVideo() {
     });
 }
 
-function playVideo(elemenet, stream) {
+function playVideo(element, stream) {
     element.srcObject = stream;
     element.play();
 }
